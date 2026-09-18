@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import shutil
 from pathlib import Path
 from io import BytesIO
 
@@ -19,6 +20,7 @@ CONFIG_DIR = BASE_DIR / "config"
 OUTPUT_DIR = BASE_DIR / "output"
 
 INPUT_FILE = DATA_DIR / "employees.xlsx"
+DEMO_FILE = DATA_DIR / "demo_employees.xlsx"
 
 MAPPING_FILE = CONFIG_DIR / "mapping_config.xlsx"
 
@@ -355,6 +357,76 @@ with st.sidebar:
 
     st.markdown("## 👥 HRIS AI")
 
+    demo_mode = st.toggle(
+        "🧪 Demo Mode（不调用 API）",
+        value=True
+    )
+
+    if demo_mode:
+
+        st.success(
+            "当前为 Demo 模式\n\n"
+            "使用虚拟数据，不调用 DeepSeek API。"
+        )
+
+    else:
+
+        st.warning(
+            "当前为真实分析模式\n\n"
+            "上传新数据后会调用 DeepSeek API。"
+        )
+
+    real_mode_authorized = False
+
+    if not demo_mode:
+
+        try:
+
+            password = st.text_input(
+                "Real Mode 密码",
+                type="password"
+            )
+
+            if "REAL_MODE_PASSWORD" not in st.secrets:
+
+                st.error(
+                    "检测不到 REAL_MODE_PASSWORD。"
+                )
+
+                st.caption(
+                    f"当前可读取的 Secrets："
+                    f"{list(st.secrets.keys())}"
+                )
+
+                real_mode_authorized = False
+
+            else:
+
+                real_mode_authorized = (
+                    password
+                    == st.secrets["REAL_MODE_PASSWORD"]
+                )
+
+                if real_mode_authorized:
+
+                    st.success(
+                        "真实分析模式已解锁"
+                    )
+
+                else:
+
+                    st.info(
+                        "请输入正确的 Real Mode 密码。"
+                    )
+
+        except Exception as e:
+
+            st.error(
+                f"读取 Streamlit Secrets 时发生错误：{e}"
+            )
+
+            real_mode_authorized = False
+
     st.caption(
         "AI-assisted HRIS Data Integration"
     )
@@ -408,16 +480,6 @@ with st.sidebar:
 
     with col3:
         st.success("● HRIS Mapping")
-
-    demo_mode = st.sidebar.checkbox(
-        "Demo Mode",
-        value=True
-    )
-
-    if demo_mode:
-        st.info(
-            "当前为 Demo Mode，建议使用虚拟员工数据。"
-        )
 
 
 # =========================================================
@@ -584,58 +646,153 @@ with tab2:
 
     else:
 
-        if st.button(
-            "🤖 开始 AI 字段分析",
-            type="primary",
-            width="stretch"
-        ):
+        if demo_mode:
 
-            with st.spinner(
-                "正在调用 DeepSeek 分析字段，请稍候..."
+            if st.button(
+                "🧪 查看 Demo 映射（不调用 API）",
+                type="primary",
+                width="stretch"
             ):
 
-                success, stdout, stderr = (
-                    run_python_script(
-                        "ai_mapper.py"
-                    )
-                )
+                if not MAPPING_FILE.exists():
 
-            if success:
-
-                field_df, value_df = (
-                    load_ai_mapping()
-                )
-
-                if field_df is not None:
-
-                    st.session_state[
-                        "ai_field_mapping"
-                    ] = field_df
-
-                    st.session_state[
-                        "ai_value_mapping"
-                    ] = value_df
-
-                    st.success(
-                        "DeepSeek 字段分析完成。"
+                    st.error(
+                        "找不到 mapping_config.xlsx"
                     )
 
                 else:
 
-                    st.error(
-                        "AI 分析完成，但没有找到结果文件。"
+                    formal_field_df = pd.read_excel(
+                        MAPPING_FILE,
+                        sheet_name="Field_Mapping"
                     )
+
+                    formal_value_df = pd.read_excel(
+                        MAPPING_FILE,
+                        sheet_name="Value_Mapping"
+                    )
+
+                    # 创建“演示版 AI 映射”
+                    demo_field_df = formal_field_df[
+                        [
+                            "source_field",
+                            "target_field"
+                        ]
+                    ].copy()
+
+                    demo_field_df[
+                        "confidence"
+                    ] = "high"
+
+                    demo_field_df[
+                        "transformation"
+                    ] = "按预设规则转换"
+
+                    demo_field_df[
+                        "review_required"
+                    ] = False
+
+                    demo_field_df[
+                        "approved"
+                    ] = True
+
+                    demo_field_df[
+                        "reason"
+                    ] = "Demo 模式使用预先确认的映射规则"
+
+                    demo_value_df = formal_value_df.copy()
+
+                    demo_value_df[
+                        "confidence"
+                    ] = "high"
+
+                    demo_value_df[
+                        "review_required"
+                    ] = False
+
+                    demo_value_df[
+                        "approved"
+                    ] = True
+
+                    demo_value_df[
+                        "reason"
+                    ] = "Demo 模式使用预先确认的值映射"
+
+                    st.session_state[
+                        "ai_field_mapping"
+                    ] = demo_field_df
+
+                    st.session_state[
+                        "ai_value_mapping"
+                    ] = demo_value_df
+
+                    st.success(
+                        "Demo 映射已加载，不消耗 DeepSeek API。"
+                    )
+
+
+        else:
+
+            if not real_mode_authorized:
+
+                st.warning(
+                    "请先解锁 Real Mode。"
+                )
 
             else:
 
-                st.error(
-                    "AI 字段分析失败。"
-                )
+                if st.button(
+                    "🤖 开始 AI 字段分析（调用 DeepSeek）",
+                    type="primary",
+                    width="stretch"
+                ):
 
-                st.code(
-                    stderr,
-                    language="text"
-                )
+                    with st.spinner(
+                        "正在调用 DeepSeek 分析字段..."
+                    ):
+
+                        success, stdout, stderr = (
+                            run_python_script(
+                                "ai_mapper.py"
+                            )
+                        )
+
+                    if success:
+
+                        field_df, value_df = (
+                            load_ai_mapping()
+                        )
+
+                        if field_df is not None:
+
+                            st.session_state[
+                                "ai_field_mapping"
+                            ] = field_df
+
+                            st.session_state[
+                                "ai_value_mapping"
+                            ] = value_df
+
+                            st.success(
+                                "DeepSeek 字段分析完成。"
+                            )
+
+                        else:
+
+                            st.error(
+                                "AI 分析完成，但没有找到结果。"
+                            )
+
+                    else:
+
+                        st.error(
+                            "DeepSeek 字段分析失败。"
+                        )
+
+                        st.code(
+                            stderr,
+                            language="text"
+                        )
 
         # -------------------------------------------------
         # 显示 AI 映射
@@ -843,8 +1000,20 @@ with tab3:
                 "建议先到“② AI 映射审核”确认映射。"
             )
 
+        if demo_mode:
+
+            button_text = (
+                "🧪 运行 Demo 数据校验"
+            )
+
+        else:
+
+            button_text = (
+                "🚀 开始真实数据校验"
+            )
+
         if st.button(
-            "🚀 开始数据校验与 HRIS 转换",
+            button_text,
             type="primary",
             width="stretch"
         ):
@@ -1011,45 +1180,219 @@ with tab4:
     # AI 错误分析
     # -----------------------------------------------------
 
-    if (
-        ERROR_FILE.exists()
-        and not pd.read_excel(
+    if ERROR_FILE.exists():
+
+        error_df = pd.read_excel(
             ERROR_FILE
-        ).empty
-    ):
+        )
 
-        if st.button(
-            "🧠 运行 DeepSeek 错误分析",
-            type="primary",
-            width="stretch"
-        ):
+        # =====================================================
+        # Demo Mode：不调用 API
+        # =====================================================
 
-            with st.spinner(
-                "正在让 DeepSeek 分析数据问题..."
-            ):
+        if demo_mode:
 
-                success, stdout, stderr = (
-                    run_python_script(
-                        "ai_error_analyzer.py"
-                    )
-                )
+            st.info(
+                "🧪 Demo 模式："
+                "以下为规则化演示分析，不调用 DeepSeek API。"
+            )
 
-            if success:
+            if error_df.empty:
 
                 st.success(
-                    "AI 错误分析完成。"
+                    "没有发现数据错误。"
                 )
 
             else:
 
-                st.error(
-                    "AI 错误分析失败。"
+                demo_analysis = []
+
+                explanations = {
+
+                    "INVALID_ENUM": {
+                        "problem":
+                            "字段值不符合当前允许的枚举值。",
+                        "cause":
+                            "原始数据出现未定义的标准值。",
+                        "action":
+                            "确认该值对应的 HRIS 标准代码。"
+                    },
+
+                    "DUPLICATE_ID": {
+                        "problem":
+                            "员工编号已经出现重复。",
+                        "cause":
+                            "多个员工记录使用了相同的员工编号。",
+                        "action":
+                            "检查原始数据并确认唯一员工编号。"
+                    },
+
+                    "INVALID_EMAIL": {
+                        "problem":
+                            "邮箱格式不符合基本邮箱格式。",
+                        "cause":
+                            "邮箱可能缺少域名或其他必要部分。",
+                        "action":
+                            "修改为有效的工作邮箱。"
+                    },
+
+                    "INVALID_DATE": {
+                        "problem":
+                            "日期无法转换为合法日期。",
+                        "cause":
+                            "日期格式错误或日期本身不存在。",
+                        "action":
+                            "确认并修改入职日期。"
+                    },
+
+                    "REQUIRED": {
+                        "problem":
+                            "必填字段为空。",
+                        "cause":
+                            "原始员工数据缺少必要字段。",
+                        "action":
+                            "补充该字段后重新处理。"
+                    }
+                }
+
+                for error_code, group in (
+                    error_df
+                    .groupby(
+                        "error_code",
+                        dropna=False
+                    )
+                ):
+
+                    explanation = explanations.get(
+                        error_code,
+                        {
+                            "problem":
+                                "检测到数据异常。",
+                            "cause":
+                                "需要进一步检查原始数据。",
+                            "action":
+                                "人工确认并修改。"
+                        }
+                    )
+
+                    demo_analysis.append({
+
+                        "error_code":
+                            error_code,
+
+                        "field":
+                            ", ".join(
+                                group[
+                                    "field"
+                                ]
+                                .astype(str)
+                                .unique()
+                            ),
+
+                        "problem":
+                            explanation[
+                                "problem"
+                            ],
+
+                        "possible_cause":
+                            explanation[
+                                "cause"
+                            ],
+
+                        "recommended_action":
+                            explanation[
+                                "action"
+                            ],
+
+                        "review_required":
+                            True
+                    })
+
+                demo_analysis_df = pd.DataFrame(
+                    demo_analysis
                 )
 
-                st.code(
-                    stderr,
-                    language="text"
+                st.subheader(
+                    "Demo 错误分析"
                 )
+
+                for _, row in (
+                    demo_analysis_df.iterrows()
+                ):
+
+                    with st.expander(
+                        f"{row['error_code']} · "
+                        f"{row['field']}"
+                    ):
+
+                        st.write(
+                            "**问题：**",
+                            row["problem"]
+                        )
+
+                        st.write(
+                            "**可能原因：**",
+                            row["possible_cause"]
+                        )
+
+                        st.write(
+                            "**建议处理：**",
+                            row["recommended_action"]
+                        )
+
+                        st.warning(
+                            "需要人工确认"
+                        )
+
+
+        # =====================================================
+        # Real Mode：调用 DeepSeek
+        # =====================================================
+
+        else:
+
+            if not real_mode_authorized:
+
+                st.warning(
+                    "请先解锁 Real Mode。"
+                )
+
+            else:
+
+                if not error_df.empty:
+
+                    if st.button(
+                        "🧠 运行 DeepSeek 错误分析（消耗 API）",
+                        type="primary",
+                        width="stretch"
+                    ):
+
+                        with st.spinner(
+                            "正在调用 DeepSeek 分析错误..."
+                        ):
+
+                            success, stdout, stderr = (
+                                run_python_script(
+                                    "ai_error_analyzer.py"
+                                )
+                            )
+
+                        if success:
+
+                            st.success(
+                                "DeepSeek 错误分析完成。"
+                            )
+
+                        else:
+
+                            st.error(
+                                "DeepSeek 错误分析失败。"
+                            )
+
+                            st.code(
+                                stderr,
+                                language="text"
+                            )
 
     # -----------------------------------------------------
     # AI 分析结果
