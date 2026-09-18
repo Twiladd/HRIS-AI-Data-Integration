@@ -1,48 +1,182 @@
-# AI-assisted HRIS Data Integration
+# AI-assisted HRIS Data Integration Workflow
 
-An AI-assisted HRIS data integration and validation prototype built with Python, DeepSeek API, Streamlit, and FastAPI.
 
-## Project Overview
+## Overview
 
-This project simulates an employee data integration workflow from Excel to an HRIS system.
+An AI-assisted HRIS data integration workflow that automates employee data mapping, validation, error analysis, and HRIS-ready export generation.
 
-The system supports:
+The system transforms raw employee Excel files into standardized HRIS import packages through AI-assisted mapping and automated data quality validation.
 
-* Employee Excel data import
-* AI-assisted field mapping
-* Value mapping and data transformation
-* Data validation and error detection
-* AI-assisted error analysis
-* HRIS-ready Excel generation
-* Mock HRIS API synchronization
-* Streamlit-based web interface
+
+## Key Features
+
+
+### 1. AI-assisted Field Mapping
+
+- Automatically analyzes employee data fields
+- Suggests HRIS standard field mappings
+- Provides confidence levels
+- Generates mapping explanations
+- Supports human review and approval
+
+
+### 2. Human-in-the-loop Review
+
+The system allows HR users to:
+
+- Review AI mapping suggestions
+- Check confidence levels
+- Approve or modify mappings before processing
+
+
+### 3. Data Validation
+
+Automatically detects:
+
+- Missing required fields
+- Invalid data formats
+- Unsupported HRIS values
+- Data quality issues
+
+
+### 4. AI Error Analysis
+
+Using DeepSeek API, the system provides:
+
+- Error explanations
+- Possible causes
+- Recommended actions
+
+
+### 5. HRIS Export Generation
+
+Generates:
+
+- HRIS import file
+- Data validation error report
+- AI analysis report
+
+
 
 ## Workflow
 
-Employee Excel
-↓
-DeepSeek AI Field Mapping
-↓
-Human Review
-↓
-Python Data Transformation
-↓
-Data Validation
-↓
+
+
+Employee Excel Data
+
+    ↓
+
+AI Field Mapping
+(DeepSeek API)
+
+    ↓
+
+Human Review & Approval
+
+    ↓
+
+Data Validation Engine
+
+    ↓
+
 AI Error Analysis
-↓
-HRIS Import / API Synchronization
 
-## Tech Stack
+    ↓
 
-Python / pandas / Excel / DeepSeek API / Streamlit / FastAPI / Git / GitHub
+HRIS Import Package
 
-## Current Status
 
-This project is a prototype for learning and demonstrating HRIS data integration concepts.
 
-The current version uses a Mock HRIS API rather than connecting to a real enterprise HRIS.
+## Technology Stack
 
-## Data Privacy
+- Python
+- Pandas
+- Streamlit
+- DeepSeek API
+- Excel Processing
+- Git/GitHub
 
-The project uses synthetic employee data for testing and demonstration purposes. No real employee personal information should be uploaded.
+
+
+## System Architecture
+
+
+          Employee Excel
+
+                |
+
+                ↓
+
+      Data Processing Layer
+
+                |
+
+                ↓
+
+      AI Mapping Engine
+
+         (DeepSeek API)
+
+                |
+
+                ↓
+
+      Human Review Layer
+
+                |
+
+                ↓
+
+      Validation Engine
+
+                |
+
+                ↓
+
+      HRIS Export Files
+
+
+
+## Demo Mode
+
+The project provides a Demo Mode that allows users to experience the complete workflow without consuming API credits.
+
+
+## Real Mode
+
+Real Mode supports:
+
+- Custom employee data upload
+- AI-powered field mapping
+- DeepSeek-powered analysis
+
+
+
+## Project Structure
+
+
+
+HRIS-Automation
+
+├── app.py                      # Streamlit web application
+├── src/
+│   ├── web_pipeline.py         # mapping, transformation, validation, AI analysis
+│   ├── ai_mapper.py            # AI field/value mapping
+│   └── ai_error_analyzer.py    # AI error analysis
+├── config/
+│   ├── mapping_config.xlsx     # field/value mapping + validation rules
+│   └── hris_schema.xlsx        # HRIS target schema
+├── data/
+│   └── demo_employees.xlsx     # demo employee data
+├── requirements.txt
+└── README.md
+
+
+
+
+## Future Improvements
+
+- HRIS API integration
+- Database connection
+- Role-based access control
+- Advanced AI recommendation system

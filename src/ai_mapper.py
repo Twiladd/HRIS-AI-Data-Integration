@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 
 import pandas as pd
-from dotenv import load_dotenv
 from openai import OpenAI
 
 
@@ -22,13 +21,11 @@ OUTPUT_FILE = BASE_DIR / "output" / "ai_mapping_suggestion.xlsx"
 # 2. 加载 API Key
 # =====================================
 
-load_dotenv(BASE_DIR / ".env")
-
 api_key = os.getenv("DEEPSEEK_API_KEY")
 
 if not api_key:
     raise ValueError(
-        "没有找到 DEEPSEEK_API_KEY，请检查项目根目录的 .env 文件。"
+        "没有找到 DEEPSEEK_API_KEY，请检查 Streamlit Secrets。"
     )
 
 

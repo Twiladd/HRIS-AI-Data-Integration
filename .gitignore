@@ -9,3 +9,4 @@ data/*.xlsx
 !data/demo_employees.xlsx
 
 .streamlit/secrets.toml
+secrets.toml/

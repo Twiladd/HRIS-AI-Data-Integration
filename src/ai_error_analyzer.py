@@ -6,7 +6,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from dotenv import load_dotenv
 from openai import OpenAI
 
 
@@ -50,10 +49,6 @@ MAIN_SCRIPT = (
 # =========================================
 # 2. 加载 API Key
 # =========================================
-
-load_dotenv(
-    BASE_DIR / ".env"
-)
 
 api_key = os.getenv(
     "DEEPSEEK_API_KEY"
