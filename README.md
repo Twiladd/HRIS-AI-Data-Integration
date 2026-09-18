@@ -8,6 +8,38 @@ An AI-assisted HRIS data integration workflow that automates employee data mappi
 The system transforms raw employee Excel files into standardized HRIS import packages through AI-assisted mapping and automated data quality validation.
 
 
+## Demo Screenshots
+
+
+### Workflow Overview
+
+![Workflow](screenshots/01_workflow.png)
+
+
+### AI Mapping Review
+
+![AI Mapping](screenshots/02_ai_mapping.png)
+
+![AI Mapping](screenshots/02_ai_mapping2.png)
+
+
+### Data Validation
+
+![Data Validation](screenshots/03_validation.png)
+
+![Data Validation](screenshots/03_validation2.png)
+
+
+### Result Report
+
+![Result Report](screenshots/04_report.png)
+
+
+### GitHub Repository
+
+![GitHub](screenshots/05_github.png)
+
+
 ## Key Features
 
 
