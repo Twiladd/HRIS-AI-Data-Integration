@@ -1,0 +1,47 @@
+{
+  "TEST001": {
+    "employee_id": "TEST001",
+    "full_name": "测试员工",
+    "gender_code": "F",
+    "department_code": "HR",
+    "hire_date": "2026-09-17",
+    "work_email": "test001@test.com",
+    "employment_status": "ACTIVE"
+  },
+  "EMP001": {
+    "employee_id": "EMP001",
+    "full_name": "张三",
+    "gender_code": "M",
+    "department_code": "HR",
+    "hire_date": "2026-09-01",
+    "work_email": "zhangsan@test.com",
+    "employment_status": "ACTIVE"
+  },
+  "EMP002": {
+    "employee_id": "EMP002",
+    "full_name": "李四",
+    "gender_code": "F",
+    "department_code": "SALES",
+    "hire_date": "2026-09-03",
+    "work_email": "lisi@test.com",
+    "employment_status": "ACTIVE"
+  },
+  "EMP003": {
+    "employee_id": "EMP003",
+    "full_name": "王五",
+    "gender_code": "M",
+    "department_code": "FIN",
+    "hire_date": "2026-09-05",
+    "work_email": "wangwu@test.com",
+    "employment_status": "PROBATION"
+  },
+  "EMP004": {
+    "employee_id": "EMP004",
+    "full_name": "赵六",
+    "gender_code": "F",
+    "department_code": "RD",
+    "hire_date": "2026-09-06",
+    "work_email": "zhaoliu@test.com",
+    "employment_status": "ACTIVE"
+  }
+}

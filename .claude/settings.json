@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python src/ai_mapper.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python src/ai_mapper.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python src/main.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python -c \"import pandas as pd; df=pd.read_excel\\('config/mapping_config.xlsx'\\); print\\('=== mapping_config.xlsx 列 ==='\\); print\\(list\\(df.columns\\)\\); print\\(df.head\\(10\\).to_string\\(\\)\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(PYTHONIOENCODING=utf-8 python _unify_fields.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python _realign_fields.py)",
+      "WebSearch",
+      "Read(//d//**)",
+      "WebFetch(domain:www.disktool.cn)",
+      "Bash(curl -sL --max-time 30 \"https://www.disktool.cn/download.html\" -o /tmp/pa_page.html)",
+      "Bash(echo \"exit=$?\")",
+      "Read(//tmp/**)",
+      "Bash(curl -L --max-time 300 --progress-bar -o \"/d/AOMEI-Partition-Assistant.zip\" \"https://www.disktool.cn/go/download/PAInstall.zip\")",
+      "Bash(curl -sIL --max-time 40 \"https://www.disktool.cn/go/download/PAInstall.zip\")",
+      "Bash(curl -sI --max-time 40 \"https://www.disktool.cn/go/download/PAInstall.zip\")",
+      "Bash(curl -sL --max-time 30 \"https://www.disktool.cn/assets/js/download.js?8530cc199d2e868cb965\" -o /tmp/pa_download.js)",
+      "Bash(curl -sIL --max-time 40 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/126.0.0.0 Safari/537.36' -e https://www.disktool.cn/download.html https://www.disktool.cn/go/download/PAInstall.zip)",
+      "Bash(rm -f \"/d/AOMEI-Partition-Assistant.zip\")",
+      "Bash(curl -L --max-time 300 -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/126.0.0.0 Safari/537.36' -e https://www.disktool.cn/download.html --progress-bar -o /d/AOMEI-Partition-Assistant.zip https://dl.aomeikeji.com/pa/PAInstall.zip)",
+      "Bash(command -v unzip)",
+      "Bash(command -v tar)",
+      "Bash(unzip -l \"/d/AOMEI-Partition-Assistant.zip\")",
+      "Bash(tar -tf \"/d/AOMEI-Partition-Assistant.zip\")",
+      "Bash(unzip -o \"/d/AOMEI-Partition-Assistant.zip\" -d /d/)",
+      "Bash(cygpath -w /tmp)",
+      "Read(//c//**)",
+      "Bash(awk '{printf \"%.2f GB\\\\n\", $5/1024/1024/1024}')",
+      "Bash(powercfg /h off)"
+    ]
+  }
+}
