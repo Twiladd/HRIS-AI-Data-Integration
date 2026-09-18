@@ -1,5 +1,11 @@
 .env
+
 __pycache__/
 *.pyc
 
 output/
+
+data/*.xlsx
+!data/demo_employees.xlsx
+
+.streamlit/secrets.toml
