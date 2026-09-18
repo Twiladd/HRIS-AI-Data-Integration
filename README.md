@@ -1,6 +1,13 @@
 # AI-assisted HRIS Data Integration Workflow
 
 
+## Live Demo
+
+[Try the Live Demo](https://hris-ai-data-integration-ikzxdxbyo6r3cjbgugcyv7.streamlit.app/)
+
+> Demo Mode is enabled by default and does not consume DeepSeek API credits.
+
+
 ## Overview
 
 An AI-assisted HRIS data integration workflow that automates employee data mapping, validation, error analysis, and HRIS-ready export generation.
