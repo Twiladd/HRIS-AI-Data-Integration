@@ -353,7 +353,7 @@ def apply_approved_mapping(
 
 with st.sidebar:
 
-    st.header("HRIS AI")
+    st.markdown("## 👥 HRIS AI")
 
     st.caption(
         "AI-assisted HRIS Data Integration"
@@ -361,21 +361,63 @@ with st.sidebar:
 
     st.divider()
 
-    st.markdown("### 当前工作流")
+    st.markdown("### 工作流")
 
-    st.write("1️⃣ 上传员工数据")
-    st.write("2️⃣ DeepSeek 分析映射")
-    st.write("3️⃣ 人工审核映射")
-    st.write("4️⃣ Python 数据校验")
-    st.write("5️⃣ AI 错误分析")
-    st.write("6️⃣ 下载结果")
+    st.markdown(
+        """
+        **① 数据上传**
+        上传员工 Excel
+
+        **② AI 映射审核**
+        DeepSeek 生成字段映射建议
+
+        **③ 数据校验**
+        检查格式、重复值、枚举值等
+
+        **④ 结果报告**
+        查看 AI 分析并下载结果
+        """
+    )
 
     st.divider()
 
+    st.markdown("### 当前版本")
+
     st.info(
-        "测试阶段请使用虚拟员工数据，不要上传真实身份证号、"
-        "手机号、住址等敏感信息。"
+        "Prototype v1.0\n\n"
+        "测试环境使用虚拟员工数据。"
     )
+
+    st.divider()
+
+    st.caption(
+        "Python · pandas · DeepSeek · Streamlit · FastAPI"
+    )
+
+    st.divider()
+
+    st.subheader("系统状态")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.success("● DeepSeek API")
+
+    with col2:
+        st.success("● Data Validation")
+
+    with col3:
+        st.success("● HRIS Mapping")
+
+    demo_mode = st.sidebar.checkbox(
+        "Demo Mode",
+        value=True
+    )
+
+    if demo_mode:
+        st.info(
+            "当前为 Demo Mode，建议使用虚拟员工数据。"
+        )
 
 
 # =========================================================
@@ -383,13 +425,13 @@ with st.sidebar:
 # =========================================================
 
 st.markdown(
-    '<div class="main-title">👥 HRIS AI Data Sync</div>',
+    '<div class="main-title">👥 AI-assisted HRIS Data Integration</div>',
     unsafe_allow_html=True
 )
 
 st.markdown(
     '<div class="subtitle">'
-    'AI-assisted employee data mapping, validation and reporting'
+    'Employee Data Mapping · Validation · AI Error Analysis'
     '</div>',
     unsafe_allow_html=True
 )
@@ -417,8 +459,33 @@ with tab1:
 
     st.header("员工数据")
 
+    st.caption(
+        "支持 .xlsx 员工数据文件。"
+        "演示环境请使用虚拟员工数据。"
+    )
+
     st.write(
         "上传 Excel 后，系统会用它作为本次 HRIS 数据处理的数据源。"
+    )
+
+    st.download_button(
+        label="📥 下载 120 条测试数据",
+        data=(
+            BASE_DIR
+            / "data"
+            / "employees.xlsx"
+        ).read_bytes()
+        if (
+            BASE_DIR
+            / "data"
+            / "employees.xlsx"
+        ).exists()
+        else b"",
+        file_name="sample_employees.xlsx",
+        mime=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        )
     )
 
     uploaded_file = st.file_uploader(
@@ -450,28 +517,26 @@ with tab1:
             col1, col2, col3, col4 = st.columns(4)
 
             with col1:
-
                 st.metric(
-                    "员工数量",
+                    "员工总数",
                     len(employees)
                 )
 
             with col2:
-
                 st.metric(
-                    "字段数量",
+                    "字段数",
                     len(employees.columns)
                 )
 
             with col3:
-
                 st.metric(
-                    "数据行",
-                    len(employees)
+                    "重复工号",
+                    employees["员工编号"].duplicated().sum()
+                    if "员工编号" in employees.columns
+                    else 0
                 )
 
             with col4:
-
                 st.metric(
                     "空值数量",
                     int(
@@ -834,6 +899,27 @@ with tab3:
                     ERROR_FILE
                 )
 
+                if not error_df.empty:
+
+                    st.subheader("错误类型分布")
+
+                    error_summary = (
+                        error_df[
+                            "error_code"
+                        ]
+                        .value_counts()
+                        .rename_axis("error_code")
+                        .reset_index(
+                            name="count"
+                        )
+                    )
+
+                    st.bar_chart(
+                        error_summary.set_index(
+                            "error_code"
+                        )
+                    )
+
                 employees = pd.read_excel(
                     INPUT_FILE
                 )
@@ -852,12 +938,9 @@ with tab3:
 
                 st.divider()
 
-                col1, col2, col3 = (
-                    st.columns(3)
-                )
+                col1, col2, col3 = st.columns(3)
 
                 with col1:
-
                     st.metric(
                         "原始员工",
                         total
@@ -865,16 +948,30 @@ with tab3:
 
                 with col2:
 
+                    success_rate = (
+                        success_count / total
+                        if total > 0
+                        else 0
+                    )
+
                     st.metric(
-                        "成功处理",
-                        success_count
+                        "通过校验",
+                        success_count,
+                        delta=f"{success_rate:.1%}"
                     )
 
                 with col3:
 
+                    error_rate = (
+                        error_rows / total
+                        if total > 0
+                        else 0
+                    )
+
                     st.metric(
-                        "错误记录",
-                        error_rows
+                        "异常记录",
+                        error_rows,
+                        delta=f"-{error_rate:.1%}"
                     )
 
                 st.subheader(
@@ -978,11 +1075,53 @@ with tab4:
 
             else:
 
-                st.dataframe(
-                    normalize_df(ai_error_df),
-                    width="stretch",
-                    height=450
-                )
+                for _, row in ai_error_df.iterrows():
+
+                    with st.expander(
+                        f"{row.get('error_code', '')} · "
+                        f"{row.get('field', '')}"
+                    ):
+
+                        st.write(
+                            "**问题：**",
+                            row.get(
+                                "problem",
+                                ""
+                            )
+                        )
+
+                        st.write(
+                            "**可能原因：**",
+                            row.get(
+                                "possible_cause",
+                                ""
+                            )
+                        )
+
+                        st.write(
+                            "**建议处理：**",
+                            row.get(
+                                "recommended_action",
+                                ""
+                            )
+                        )
+
+                        review = row.get(
+                            "review_required",
+                            False
+                        )
+
+                        if str(review).lower() == "true":
+
+                            st.warning(
+                                "需要人工确认"
+                            )
+
+                        else:
+
+                            st.success(
+                                "无需人工确认"
+                            )
 
         except Exception as e:
 
@@ -1089,3 +1228,22 @@ with tab4:
             st.caption(
                 f"○ {label}：尚未生成"
             )
+
+
+# =========================================================
+# 8. 关于本项目
+# =========================================================
+
+with st.expander("ℹ️ 关于这个项目"):
+
+    st.write(
+        """
+        本项目是一个 AI-assisted HRIS Data Integration Prototype。
+
+        主要用于模拟员工数据从 Excel 到 HRIS 的处理流程，
+        包括字段映射、值映射、数据校验、AI 异常分析和
+        Mock HRIS API 同步。
+
+        当前版本使用虚拟员工数据，不连接真实企业 HRIS。
+        """
+    )
